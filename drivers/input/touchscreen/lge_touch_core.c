@@ -1731,22 +1731,6 @@ static ssize_t show_charger(struct lge_touch_data *ts, char *buf)
 	return sprintf(buf, "%d\n", ts->charger_type);
 }
 
-static ssize_t show_boosted_time(struct lge_touch_data *ts, char *buf)
-{
-	return sprintf(buf, "%d\n", boosted_time);
-}
-
-static ssize_t store_boosted_time(struct lge_touch_data *ts, const char *buf,
-			     size_t count)
-{
-	unsigned int value;
-	sscanf(buf, "%d", &value);
-
-	boosted_time = value;
-
-	return count;
-}
-
 #ifdef CONFIG_DOUBLETAP_WAKE
 /* show_dt_wake_enabled
  *
@@ -1798,7 +1782,6 @@ static LGE_TOUCH_ATTR(show_touches, S_IRUGO | S_IWUSR, show_show_touches, store_
 static LGE_TOUCH_ATTR(pointer_location, S_IRUGO | S_IWUSR, show_pointer_location,
 					store_pointer_location);
 static LGE_TOUCH_ATTR(charger, S_IRUGO | S_IWUSR, show_charger, NULL);
-static LGE_TOUCH_ATTR(boost_time, S_IRUGO | S_IWUSR, show_boosted_time, store_boosted_time);
 #ifdef CONFIG_DOUBLETAP_WAKE
 static LGE_TOUCH_ATTR(dt_wake_enabled, S_IRUGO | S_IWUSR, show_dt_wake_enabled,
 					store_dt_wake_enabled);
@@ -1815,7 +1798,6 @@ static struct attribute *lge_touch_attribute_list[] = {
 	&lge_touch_attr_show_touches.attr,
 	&lge_touch_attr_pointer_location.attr,
 	&lge_touch_attr_charger.attr,
-	&lge_touch_attr_boost_time.attr,
 #ifdef CONFIG_DOUBLETAP_WAKE
 	&lge_touch_attr_dt_wake_enabled.attr,
 #endif

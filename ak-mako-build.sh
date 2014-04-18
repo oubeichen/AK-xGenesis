@@ -15,7 +15,7 @@ AK_VER=$BASE_AK_VER$VER
 
 # AK Variables
 export LOCALVERSION="~"`echo $AK_VER`
-export CROSS_COMPILE=${HOME}/android/AK-linaro/4.8.3-2014.02.20140217.CR83/bin/arm-cortex_a15-linux-gnueabihf-
+export CROSS_COMPILE=${HOME}/android/AK-linaro/4.7.4-2014.04.20140418.CR83/bin/arm-cortex_a15-linux-gnueabihf-
 export ARCH=arm
 export SUBARCH=arm
 export KBUILD_BUILD_USER=ak
@@ -69,8 +69,7 @@ echo "-------------------------"
 echo -e "${restore}"
 
 make "ak_mako_defconfig"
-#make -j3 > /dev/null
-make -j8
+make -j9
 
 echo -e "${green}"
 echo "--------------------------"

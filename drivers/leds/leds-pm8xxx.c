@@ -1035,10 +1035,6 @@ static int __devinit pm8xxx_led_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, led);
 	printk("[leds_pm8xxx] pm8xxx_led_probe end\n");
 
-	/* Config PWM */
-	if ((pdata) && (pdata->pwm_init))
-		pdata->pwm_init();
-
 	return 0;
 
 fail_id_check:

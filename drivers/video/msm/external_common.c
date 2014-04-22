@@ -1452,38 +1452,6 @@ static void hdmi_edid_detail_desc(const uint8 *data_buf, uint32 *disp_mode)
 		DEV_INFO("%s: *no mode* found\n", __func__);
 }
 
-static void limit_supported_video_format(uint32 *video_format)
-{
-	switch(slimport_get_link_bw()){
-	case 0x0a:
-		if((*video_format == HDMI_VFRMT_1920x1080p60_16_9) ||
-			(*video_format == HDMI_VFRMT_2880x480p60_4_3)||
-			(*video_format == HDMI_VFRMT_2880x480p60_16_9) ||
-			(*video_format == HDMI_VFRMT_1280x720p120_16_9))
-
-			*video_format = HDMI_VFRMT_1280x720p60_16_9;
-		else if((*video_format == HDMI_VFRMT_1920x1080p50_16_9) ||
-			(*video_format == HDMI_VFRMT_2880x576p50_4_3)||
-			(*video_format == HDMI_VFRMT_2880x576p50_16_9) ||
-			(*video_format == HDMI_VFRMT_1280x720p100_16_9))
-
-			*video_format = HDMI_VFRMT_1280x720p50_16_9;
-		else if (*video_format == HDMI_VFRMT_1920x1080i100_16_9)
-			*video_format = HDMI_VFRMT_1920x1080i50_16_9;
-
-		else if (*video_format == HDMI_VFRMT_1920x1080i120_16_9)
-			*video_format = HDMI_VFRMT_1920x1080i60_16_9;
-		break;
-	case 0x06:
-		if(*video_format != HDMI_VFRMT_640x480p60_4_3)
-			*video_format = HDMI_VFRMT_640x480p60_4_3;
-		break;
-	case 0x14:
-	default:
-		break;
-	}
-}
-
 static void add_supported_video_format(
 	struct hdmi_disp_mode_list_type *disp_mode_list,
 	uint32 video_format)
@@ -1491,8 +1459,7 @@ static void add_supported_video_format(
 	const struct msm_hdmi_mode_timing_info *timing;
 	boolean supported = false;
 	boolean mhl_supported = true;
-	limit_supported_video_format(&video_format);
-
+	
 	if (video_format >= HDMI_VFRMT_MAX)
 		return;
 

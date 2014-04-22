@@ -2976,9 +2976,6 @@ static ssize_t show_f54(struct lge_touch_data *ts, char *buf)
 	int ret = 0;
 
 	if (ts->curr_pwr_state == POWER_ON || ts->curr_pwr_state == POWER_WAKE) {
-		SYNA_PDTScan();
-		SYNA_ConstructRMI_F54();
-		SYNA_ConstructRMI_F1A();
 
 		ret = sprintf(buf, "====== F54 Function Info ======\n");
 
@@ -3004,12 +3001,6 @@ static ssize_t show_f54(struct lge_touch_data *ts, char *buf)
 		if (ts->pdata->role->ghost_detection_enable) {
 			hrtimer_cancel(&hr_touch_trigger_timer);
 		}
-
-		ret += sprintf(buf+ret, "F54_FullRawCap(%d) Test Result: %s", f54_fullrawcap_mode, (F54_FullRawCap(f54_fullrawcap_mode) > 0) ? "Pass\n" : "Fail\n" );
-		ret += sprintf(buf+ret, "F54_TxToTxReport() Test Result: %s", (F54_TxToTxReport() > 0) ? "Pass\n" : "Fail\n" );
-		ret += sprintf(buf+ret, "F54_RxToRxReport() Test Result: %s", (F54_RxToRxReport() > 0) ? "Pass\n" : "Fail\n" );
-		ret += sprintf(buf+ret, "F54_TxToGndReport() Test Result: %s", (F54_TxToGndReport() > 0) ? "Pass\n" : "Fail\n" );
-		ret += sprintf(buf+ret, "F54_HighResistance() Test Result: %s", (F54_HighResistance() > 0) ? "Pass\n" : "Fail\n" );
 
 		if (ts->pdata->role->operation_mode)
 			enable_irq(ts->client->irq);

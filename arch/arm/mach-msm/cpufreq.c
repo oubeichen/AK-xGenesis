@@ -38,7 +38,7 @@
 
 #ifdef CONFIG_MSM_SLEEPER
 /* maxscroff */
-uint32_t maxscroff_freq = 702000;
+uint32_t maxscroff_freq = 486000;
 uint32_t maxscroff = 1;
 #endif
 

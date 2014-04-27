@@ -20,6 +20,7 @@
 #include <linux/timer.h>
 #include <linux/slab.h>
 #include <linux/cpufreq.h>
+#include <linux/fb.h>
 #include <linux/input.h>
 #include <linux/math64.h>
 
@@ -33,7 +34,7 @@
 #define DEFAULT_DOWN_LOCK_DUR	1000
 #define DEFAULT_BOOST_LOCK_DUR	4000 * 1000L
 #define DEFAULT_NR_CPUS_BOOSTED	2
-#define DEFAULT_MIN_CPUS_ONLINE	2
+#define DEFAULT_MIN_CPUS_ONLINE	1
 #define DEFAULT_MAX_CPUS_ONLINE	NR_CPUS
 
 static unsigned int debug = 0;
@@ -319,6 +320,16 @@ static void msm_hotplug_resume_work(struct work_struct *work)
 	online_cpu(stats.total_cpus);
 }
 EXPORT_SYMBOL_GPL(msm_hotplug_resume_work);
+
+static int fb_notifier_callback(struct notifier_block *nb,
+                                 unsigned long event, void *data)
+{
+        if (event == FB_BLANK_UNBLANK)
+		schedule_work(&hotplug.resume_work);
+
+        return 0;
+}
+EXPORT_SYMBOL_GPL(fb_notifier_callback);
 
 static void hotplug_input_event(struct input_handle *handle, unsigned int type,
 				unsigned int code, int value)
@@ -711,6 +722,13 @@ static int __devinit msm_hotplug_probe(struct platform_device *pdev)
 	ret = sysfs_create_group(module_kobj, &attr_group);
 	if (ret) {
 		pr_err("%s: Failed to create sysfs: %d\n", MSM_HOTPLUG, ret);
+		goto err_dev;
+	}
+
+	hotplug.notif.notifier_call = fb_notifier_callback;
+        if (fb_register_client(&hotplug.notif) != 0) {
+                pr_err("%s: Failed to register notifier callback\n",
+                       MSM_HOTPLUG);
 		goto err_dev;
 	}
 

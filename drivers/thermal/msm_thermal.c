@@ -36,12 +36,12 @@
  * HOT_TEMP_OFFSET_MS - number of ms to subtract from polling time when temps are hot
  * DEFAULT_MIN_FREQ_INDEX - frequency table index for the lowest frequency to drop to during throttling
  * */
-#define DEFAULT_THROTTLE_TEMP		70
-#define MAX_THROTTLE_TEMP			80
-#define COOL_TEMP					45
+#define DEFAULT_THROTTLE_TEMP		80
+#define MAX_THROTTLE_TEMP			90
+#define COOL_TEMP					50
 #define COOL_TEMP_OFFSET_MS			250
 #define HOT_TEMP_OFFSET_MS			250
-#define DEFAULT_MIN_FREQ_INDEX		9
+#define DEFAULT_MIN_FREQ_INDEX		7
 
 static int enabled;
 static struct msm_thermal_data msm_thermal_info;

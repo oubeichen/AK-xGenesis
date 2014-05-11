@@ -636,7 +636,7 @@ static void cpufreq_interactive_idle_start(void)
 
 	pending = timer_pending(&pcpu->cpu_timer);
 
-	if (pcpu->target_freq >= pcpu->policy->min) {
+	if (pcpu->target_freq != pcpu->policy->min) {
 		/*
 		 * Entering idle while not at lowest speed.  On some
 		 * platforms this can hold the other CPU(s) at that speed

@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2010-2014, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -29,9 +29,8 @@
 #include <linux/cpufreq.h>
 #include <linux/kernel_stat.h>
 #include <linux/tick.h>
-#include <linux/suspend.h>
 #include <asm/smp_plat.h>
-#include "acpuclock.h"
+#include <linux/suspend.h>
 
 #define MAX_LONG_SIZE 24
 #define DEFAULT_RQ_POLL_JIFFIES 1
@@ -39,7 +38,6 @@
 
 struct notifier_block freq_transition;
 struct notifier_block cpu_hotplug;
-struct notifier_block freq_policy;
 
 struct cpu_load_data {
 	cputime64_t prev_cpu_idle;
@@ -104,11 +102,16 @@ static inline cputime64_t get_cpu_iowait_time(unsigned int cpu,
 
 static int update_average_load(unsigned int freq, unsigned int cpu)
 {
-
-	struct cpu_load_data *pcpu = &per_cpu(cpuload, cpu);
-	cputime64_t cur_wall_time, cur_idle_time, cur_iowait_time;
+	int ret;
 	unsigned int idle_time, wall_time, iowait_time;
 	unsigned int cur_load, load_at_max_freq;
+	cputime64_t cur_wall_time, cur_idle_time, cur_iowait_time;
+	struct cpu_load_data *pcpu = &per_cpu(cpuload, cpu);
+	struct cpufreq_policy policy;
+
+        ret = cpufreq_get_policy(&policy, cpu);
+        if (ret)
+                return -EINVAL;
 
 	cur_idle_time = get_cpu_idle_time(cpu, &cur_wall_time);
 	cur_iowait_time = get_cpu_iowait_time(cpu, &cur_wall_time);
@@ -131,7 +134,7 @@ static int update_average_load(unsigned int freq, unsigned int cpu)
 	cur_load = 100 * (wall_time - idle_time) / wall_time;
 
 	/* Calculate the scaled load across CPU */
-	load_at_max_freq = (cur_load * freq) / pcpu->policy_max;
+	load_at_max_freq = (cur_load * policy.cur) / policy.max;
 
 	if (!pcpu->avg_load_maxfreq) {
 		/* This is the first sample in this window*/
@@ -202,7 +205,7 @@ static int cpu_hotplug_handler(struct notifier_block *nb,
 	switch (val) {
 	case CPU_ONLINE:
 		if (!this_cpu->cur_freq)
-			this_cpu->cur_freq = acpuclk_get_rate(cpu);
+			this_cpu->cur_freq = cpufreq_quick_get(cpu);
 	case CPU_ONLINE_FROZEN:
 		this_cpu->avg_load_maxfreq = 0;
 	}
@@ -229,22 +232,6 @@ static int system_suspend_handler(struct notifier_block *nb,
 	return NOTIFY_OK;
 }
 
-static int freq_policy_handler(struct notifier_block *nb,
-			unsigned long event, void *data)
-{
-	struct cpufreq_policy *policy = data;
-	struct cpu_load_data *this_cpu = &per_cpu(cpuload, policy->cpu);
-
-	if (event != CPUFREQ_NOTIFY)
-		goto out;
-
-	this_cpu->policy_max = policy->max;
-
-	pr_debug("Policy max changed from %u to %u, event %lu\n",
-			this_cpu->policy_max, policy->max, event);
-out:
-	return NOTIFY_DONE;
-}
 
 static ssize_t hotplug_disable_show(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
@@ -395,11 +382,12 @@ static int __init msm_rq_stats_init(void)
 	int ret;
 	int i;
 	struct cpufreq_policy cpu_policy;
+
+#ifndef CONFIG_SMP
 	/* Bail out if this is not an SMP Target */
-	if (!is_smp()) {
-		rq_info.init = 0;
-		return -ENOSYS;
-	}
+	rq_info.init = 0;
+	return -ENOSYS;
+#endif
 
 	rq_wq = create_singlethread_workqueue("rq_stats");
 	BUG_ON(!rq_wq);
@@ -420,17 +408,14 @@ static int __init msm_rq_stats_init(void)
 		cpufreq_get_policy(&cpu_policy, i);
 		pcpu->policy_max = cpu_policy.cpuinfo.max_freq;
 		if (cpu_online(i))
-			pcpu->cur_freq = acpuclk_get_rate(i);
+			pcpu->cur_freq = cpufreq_quick_get(i);
 		cpumask_copy(pcpu->related_cpus, cpu_policy.cpus);
 	}
 	freq_transition.notifier_call = cpufreq_transition_handler;
 	cpu_hotplug.notifier_call = cpu_hotplug_handler;
-	freq_policy.notifier_call = freq_policy_handler;
 	cpufreq_register_notifier(&freq_transition,
 					CPUFREQ_TRANSITION_NOTIFIER);
 	register_hotcpu_notifier(&cpu_hotplug);
-	cpufreq_register_notifier(&freq_policy,
-					CPUFREQ_POLICY_NOTIFIER);
 
 	return ret;
 }
@@ -438,11 +423,11 @@ late_initcall(msm_rq_stats_init);
 
 static int __init msm_rq_stats_early_init(void)
 {
+#ifndef CONFIG_SMP
 	/* Bail out if this is not an SMP Target */
-	if (!is_smp()) {
-		rq_info.init = 0;
-		return -ENOSYS;
-	}
+	rq_info.init = 0;
+	return -ENOSYS;
+#endif
 
 	pm_notifier(system_suspend_handler, 0);
 	return 0;

@@ -10,12 +10,12 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".215.EXODUS.MAKO"
+VER=".255.EXODUS.MAKO"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables
 export LOCALVERSION="~"`echo $AK_VER`
-export CROSS_COMPILE=${HOME}/android/AK-linaro/4.9.1-2014.04.20140425.CR83/bin/arm-cortex_a15-linux-gnueabihf-
+export CROSS_COMPILE=${HOME}/android/AK-linaro/4.9.1-2014.05.20140518.CR83/bin/arm-cortex_a15-linux-gnueabihf-
 export ARCH=arm
 export SUBARCH=arm
 export KBUILD_BUILD_USER=ak

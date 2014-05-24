@@ -356,6 +356,9 @@ CFLAGS_MODULE   = -DMODULE -fno-pic -mtune=cortex-a15 -marm -ffast-math -mfpu=ne
 AFLAGS_MODULE   =
 LDFLAGS_MODULE  =
 CFLAGS_KERNEL	= -mtune=cortex-a15 -marm -ffast-math -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -fgcse-las
+ifdef CONFIG_CC_GRAPHITE_OPTIMIZATION
+CFLAGS_KERNEL += -fgraphite-identity -floop-parallelize-all -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block
+endif
 AFLAGS_KERNEL	= -mtune=cortex-a15 -marm -ffast-math -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -fgcse-las
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
@@ -581,6 +584,9 @@ else
 KBUILD_CFLAGS	+= -O3
 KBUILD_CFLAGS   += $(call cc-disable-warning,maybe-uninitialized) -fno-inline-functions
 KBUILD_CFLAGS   += $(call cc-disable-warning,array-bounds)
+endif
+ifdef CONFIG_CC_GRAPHITE_OPTIMIZATION
+KBUILD_CFLAGS += -fgraphite-identity -floop-parallelize-all -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block
 endif
 
 include $(srctree)/arch/$(SRCARCH)/Makefile

@@ -71,10 +71,10 @@ static struct cpu_hotplug {
 	unsigned int cpus_boosted;
 	unsigned int offline_load;
 	unsigned int down_lock_dur;
-	unsigned int fast_lane_min_freq;
-	unsigned int fast_lane_load;
 	u64 boost_lock_dur;
 	u64 last_input;
+	unsigned int fast_lane_load;
+	unsigned int fast_lane_min_freq;
 	struct work_struct up_work;
 	struct work_struct down_work;
 #if defined(CONFIG_LCD_NOTIFY) || defined(CONFIG_POWERSUSPEND) || defined(CONFIG_HAS_EARLYSUSPEND)
@@ -168,7 +168,8 @@ static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu, u64 *wall)
 	return jiffies_to_usecs(idle_time);
 }
 
-static inline u64 get_cpu_idle_time(unsigned int cpu, u64 *wall)
+static inline u64 get_cpu_idle_time(unsigned int cpu,
+					    u64 *wall)
 {
 	u64 idle_time = get_cpu_idle_time_us(cpu, NULL);
 
@@ -325,7 +326,7 @@ static int get_lowest_load_cpu(void)
 {
 	int cpu, lowest_cpu = 0;
 	unsigned int lowest_load = UINT_MAX;
-	unsigned int cpu_load[NR_CPUS];
+	unsigned int cpu_load[stats.total_cpus];
 	unsigned int proj_load;
 	struct cpu_load_data *pcpu;
 
@@ -473,14 +474,14 @@ static void msm_hotplug_work(struct work_struct *work)
 	update_load_stats();
 
 	if (cpufreq_quick_get(0) >= hotplug.fast_lane_min_freq &&
-			stats.cur_max_load >= hotplug.fast_lane_load) {
+	    stats.cur_max_load >= hotplug.fast_lane_load) {
 		/* Enter the fast lane */
 		online_cpu(hotplug.max_cpus_online);
 		goto reschedule;
 	}
 
 	/* If number of cpus locked, break out early */
-	if (hotplug.min_cpus_online == num_possible_cpus()) {
+	if (hotplug.min_cpus_online == stats.total_cpus) {
 		if (stats.online_cpus != hotplug.min_cpus_online)
 			online_cpu(hotplug.min_cpus_online);
 		goto reschedule;
@@ -1090,7 +1091,7 @@ static ssize_t store_min_cpus_online(struct device *dev,
 	unsigned int val;
 
 	ret = sscanf(buf, "%u", &val);
-	if (ret != 1 || val < 1 || val > DEFAULT_MAX_CPUS_ONLINE)
+	if (ret != 1 || val < 1 || val > stats.total_cpus)
 		return -EINVAL;
 
 	if (hotplug.max_cpus_online < val)
@@ -1116,7 +1117,7 @@ static ssize_t store_max_cpus_online(struct device *dev,
 	unsigned int val;
 
 	ret = sscanf(buf, "%u", &val);
-	if (ret != 1 || val < 1 || val > DEFAULT_MAX_CPUS_ONLINE)
+	if (ret != 1 || val < 1 || val > stats.total_cpus)
 		return -EINVAL;
 
 	if (hotplug.min_cpus_online > val)
@@ -1167,7 +1168,7 @@ static ssize_t store_cpus_boosted(struct device *dev,
 	unsigned int val;
 
 	ret = sscanf(buf, "%u", &val);
-	if (ret != 1 || val < 1 || val > DEFAULT_MAX_CPUS_ONLINE)
+	if (ret != 1 || val < 1 || val > stats.total_cpus)
 		return -EINVAL;
 
 	hotplug.cpus_boosted = val;

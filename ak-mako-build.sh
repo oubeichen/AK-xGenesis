@@ -10,7 +10,7 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".280.EXODUS.geeb-cm"
+VER=".280.KTU.geeb-cm"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables

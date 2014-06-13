@@ -10,7 +10,7 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".302.POSEIDON.geeb-aosp"
+VER=".303.POSEIDON.geeb-aosp"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables

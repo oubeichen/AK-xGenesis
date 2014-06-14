@@ -1349,9 +1349,12 @@ static int msm_otg_usbdev_notify(struct notifier_block *self,
 	 * ACA dock can supply IDEV_CHG irrespective devices connected
 	 * on the accessory port.
 	 */
-	if (!udev->parent || udev->parent->parent ||
+
+	// do not cause required code to be skipped -ziddey
+	// will not switch to a_host or charge otherwise
+	/*if (!udev->parent || udev->parent->parent ||
 			motg->chg_type == USB_ACA_DOCK_CHARGER)
-		goto out;
+		goto out;*/
 
 	switch (action) {
 	case USB_DEVICE_ADD:
@@ -1465,7 +1468,6 @@ static int msm_otg_set_host(struct usb_otg *otg, struct usb_bus *host)
 		return -ENODEV;
 	}
 
-/*
 	if (!machine_is_apq8064_mako()) {
 		if (!motg->pdata->vbus_power && host) {
 			vbus_otg = devm_regulator_get(motg->phy.dev, "vbus_otg");
@@ -1475,7 +1477,7 @@ static int msm_otg_set_host(struct usb_otg *otg, struct usb_bus *host)
 			}
 		}
 	}
-*/
+
 	if (!host) {
 		if (otg->phy->state == OTG_STATE_A_HOST) {
 			pm_runtime_get_sync(otg->phy->dev);
@@ -2276,7 +2278,7 @@ static void msm_chg_detect_work(struct work_struct *w)
 				if (otg_hack_active) {
 					// simulate ID_A to force host mode
 					// with charging -ziddey
-					pr_info("*** FORCING USB HOST MODE W/ CHARGING ***\n");
+					pr_info("*** FORCING USB HOST MODE WITH CHARGING ***\n");
 					set_bit(ID_A, &motg->inputs);
 					motg->chg_type = USB_ACA_A_CHARGER;
 				} else
@@ -4097,9 +4099,9 @@ static int __init msm_otg_probe(struct platform_device *pdev)
 				goto remove_phy;
 			}
 		} else {
-			//ret = -ENODEV;
+			ret = -ENODEV;
 			dev_err(&pdev->dev, "PMIC IRQ for ID notifications doesn't exist\n");
-			//goto remove_phy;
+			goto remove_phy;
 		}
 	}
 
@@ -4127,10 +4129,11 @@ static int __init msm_otg_probe(struct platform_device *pdev)
 #endif
 
 	if (motg->pdata->phy_type == SNPS_28NM_INTEGRATED_PHY) {
-		if (motg->pdata->otg_control == OTG_PMIC_CONTROL) {
+		if (motg->pdata->otg_control == OTG_PMIC_CONTROL &&
+			(!(motg->pdata->mode == USB_OTG) ||
+			 motg->pdata->pmic_id_irq))
 			motg->caps = ALLOW_PHY_POWER_COLLAPSE |
 				ALLOW_PHY_RETENTION;
-		}
 
 		if (motg->pdata->otg_control == OTG_PHY_CONTROL)
 			motg->caps = ALLOW_PHY_RETENTION;

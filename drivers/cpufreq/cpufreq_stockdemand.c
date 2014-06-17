@@ -81,10 +81,17 @@ struct cpufreq_governor cpufreq_gov_stockdemand = {
 enum {DBS_NORMAL_SAMPLE, DBS_SUB_SAMPLE};
 
 struct cpu_dbs_info_s {
-	cputime64_t prev_cpu_idle;
-	cputime64_t prev_cpu_iowait;
-	cputime64_t prev_cpu_wall;
-	cputime64_t prev_cpu_nice;
+	u64 prev_cpu_idle;
+	u64 prev_cpu_iowait;
+	u64 prev_cpu_wall;
+	u64 prev_cpu_nice;
+	/*
+	 * Used to keep track of load in the previous interval. However, when
+	 * explicitly set to zero, it is used as a flag to ensure that we copy
+	 * the previous load to the current interval only once, upon the first
+	 * wake-up from idle.
+	 */
+	unsigned int prev_load;	
 	struct cpufreq_policy *cur_policy;
 	struct delayed_work work;
 	struct cpufreq_frequency_table *freq_table;
@@ -92,7 +99,6 @@ struct cpu_dbs_info_s {
 	unsigned int freq_lo_jiffies;
 	unsigned int freq_hi_jiffies;
 	unsigned int rate_mult;
-	unsigned int prev_load;
 	unsigned int max_load;
 	int cpu;
 	unsigned int sample_type:1;
@@ -726,8 +732,10 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 	unsigned int cur_load = 0;
 	unsigned int max_load_other_cpu = 0;
 	struct cpufreq_policy *policy;
+	unsigned int sampling_rate;
 	unsigned int j;
 
+	sampling_rate = dbs_tuners_ins.sampling_rate * this_dbs_info->rate_mult;
 	this_dbs_info->freq_lo = 0;
 	policy = this_dbs_info->cur_policy;
 	if(policy == NULL)
@@ -1017,11 +1025,19 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		dbs_enable++;
 		for_each_cpu(j, policy->cpus) {
 			struct cpu_dbs_info_s *j_dbs_info;
+			unsigned int prev_load;
+
 			j_dbs_info = &per_cpu(od_cpu_dbs_info, j);
 			j_dbs_info->cur_policy = policy;
 
 			j_dbs_info->prev_cpu_idle = get_cpu_idle_time(j,
 						&j_dbs_info->prev_cpu_wall);
+
+			prev_load = (unsigned int)
+				(j_dbs_info->prev_cpu_wall - j_dbs_info->prev_cpu_idle);
+			j_dbs_info->prev_load = 100 * prev_load /
+				(unsigned int) j_dbs_info->prev_cpu_wall;
+
 			if (dbs_tuners_ins.ignore_nice)
 				j_dbs_info->prev_cpu_nice =
 						kcpustat_cpu(j).cpustat[CPUTIME_NICE];

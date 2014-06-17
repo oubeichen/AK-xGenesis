@@ -10,12 +10,12 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".303.POSEIDON.geeb-cm"
+VER=".311.POSEIDON.geeb-cm"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables
 export LOCALVERSION="~"`echo $AK_VER`
-export CROSS_COMPILE=${HOME}/kernel/AK-linaro/4.9.1-2014.05.20140518.CR83/bin/arm-cortex_a15-linux-gnueabihf-
+export CROSS_COMPILE=${HOME}/android/AK-linaro/4.9.1-2014.06.20140614.CR83/bin/arm-cortex_a15-linux-gnueabihf-
 export ARCH=arm
 export SUBARCH=arm
 export KBUILD_BUILD_USER=ak

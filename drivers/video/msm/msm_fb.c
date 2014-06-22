@@ -902,7 +902,7 @@ static void msmfb_early_resume(struct early_suspend *h)
 }
 #endif
 
-static int unset_bl_level, bl_updated;
+static int unset_bl_level = LED_FULL, bl_updated;
 #if defined(CONFIG_BACKLIGHT_LM3530)
 static int bl_level_old = 0x2A;
 #else
@@ -1633,11 +1633,6 @@ static int msm_fb_register(struct msm_fb_data_type *mfd)
 	    ("FrameBuffer[%d] %dx%d size=%d bytes is registered successfully!\n",
 	     mfd->index, fbi->var.xres, fbi->var.yres, fbi->fix.smem_len);
 
-#ifdef CONFIG_FB_MSM_LOGO
-	/* Flip buffer */
-	if (!load_565rle_image(INIT_IMAGE_FILE, bf_supported))
-		;
-#endif
 	ret = 0;
 
 #ifdef CONFIG_HAS_EARLYSUSPEND

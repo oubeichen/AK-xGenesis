@@ -168,7 +168,7 @@ static struct msm_gpiomux_config apq8064_cam_common_configs[] = {
 	},
 };
 
-#if defined(CONFIG_IMX111) || defined(CONFIG_IMX091)
+#if defined(CONFIG_IMX111)
 static struct msm_bus_vectors cam_init_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_VFE,

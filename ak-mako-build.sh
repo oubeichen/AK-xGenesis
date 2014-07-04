@@ -10,7 +10,7 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".325.POSEIDON.MAKO.CM"
+VER=".328.POSEIDON.MAKO.CM"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables

@@ -10,7 +10,7 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".324.POSEIDON.geeb-cm"
+VER=".335.geeb-cm"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables

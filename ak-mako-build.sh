@@ -10,7 +10,7 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".AUG2.geeb-cm"
+VER=".AUG5.geeb-cm"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables

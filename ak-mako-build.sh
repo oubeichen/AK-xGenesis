@@ -10,7 +10,7 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".340.MAKO.CM"
+VER=".345.MAKO.CM"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables

@@ -19,7 +19,6 @@
 #define LGE_TOUCH_CORE_H
 
 #include <linux/power_supply.h>
-#include <linux/wakelock.h>
 //#define LGE_TOUCH_TIME_DEBUG
 
 #define MAX_FINGER	10
@@ -27,20 +26,17 @@
 
 #ifdef CONFIG_DOUBLETAP_WAKE
 
-#define DTW_MAX_INTERVAL	(700)
-#define DTW_TOUCH_AREA		(30)
-#define DTW_LOCK_TIMEOUT	(700)
+#define DTW_MAX_INTERVAL	(600)
+#define DTW_TOUCH_AREA		(350)
 
 struct double_tap_wake {
 	unsigned int enabled;
 	unsigned int pending_status;
 	unsigned int pending;
 	unsigned int max_interval;
-	unsigned int lock_timeout;
 	unsigned int hits;
-	int touch;
+	int touch_id;
 	unsigned long time;
-	struct wake_lock wlock;
 	struct mutex lock;
 };
 #endif
@@ -395,7 +391,7 @@ enum {
 #define LGE_TOUCH_NAME		"lge_touch"
 
 /* Debug Mask setting */
-#define TOUCH_DEBUG_PRINT	(1)
+#define TOUCH_DEBUG_PRINT       (1)
 #define TOUCH_ERROR_PRINT       (1)
 //#define TOUCH_INFO_PRINT        (1)
 

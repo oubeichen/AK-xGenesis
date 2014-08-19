@@ -10,16 +10,16 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".335.geeb-aosp"
+VER=".345.geeb-aosp"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables
 export LOCALVERSION="~"`echo $AK_VER`
-export CROSS_COMPILE=${HOME}/kernel/AK-linaro/4.9.1-2014.06.20140614.CR83/bin/arm-cortex_a15-linux-gnueabihf-
+export CROSS_COMPILE=${HOME}/kernel/AK-linaro/4.9.1-2014.07.20140718.CR83/bin/arm-cortex_a15-linux-gnueabihf-
 export ARCH=arm
 export SUBARCH=arm
-export KBUILD_BUILD_USER=ak
-export KBUILD_BUILD_HOST="kernel"
+export KBUILD_BUILD_USER=Edgar
+export KBUILD_BUILD_HOST="BuildBox"
 
 DATE_START=$(date +"%s")
 

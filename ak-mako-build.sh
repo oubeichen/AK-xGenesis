@@ -10,7 +10,7 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".345.geeb-aosp"
+VER=".350.geeb-aosp"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables

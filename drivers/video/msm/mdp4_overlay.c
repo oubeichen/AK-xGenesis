@@ -2839,13 +2839,15 @@ static int mdp4_calc_req_mdp_clk(struct msm_fb_data_type *mfd,
 	pr_debug("%s: the right %d shifted xscale is %d.\n",
 		 __func__, shift, xscale);
 
-	if (src_h > dst_h)
+	if (src_h > dst_h) {
 		yscale = src_h;
-	else
-		yscale = dst_h;
+		yscale <<= shift;
+		yscale /= dst_h;
+	} else {		/* upscale */
+		yscale = 1;
+		yscale <<= shift;
+	}
 
-	yscale <<= shift;
-	yscale /= dst_h;
 	yscale *= src_w;
 	yscale /= hsync;
 
@@ -3549,14 +3551,12 @@ int mdp4_overlay_set(struct fb_info *info, struct mdp_overlay *req)
 
 	mixer = mfd->panel_info.pdest;	/* DISPLAY_1 or DISPLAY_2 */
 
-	if (!perf_current.use_ov_blt[mixer]) {
-		ret = mdp4_calc_req_blt(mfd, req);
-		if (ret < 0) {
-			mutex_unlock(&mfd->dma->ov_mutex);
-			pr_err("%s: blt mode is required! ret=%d\n",
-				__func__, ret);
-			return ret;
-		}
+	ret = mdp4_calc_req_blt(mfd, req);
+
+	if (ret < 0) {
+		mutex_unlock(&mfd->dma->ov_mutex);
+		pr_err("%s: blt mode is required! ret=%d\n", __func__, ret);
+		return ret;
 	}
 
 	ret = mdp4_overlay_req2pipe(req, mixer, &pipe, mfd);

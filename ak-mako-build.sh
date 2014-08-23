@@ -10,7 +10,7 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".350.geeb-cm"
+VER=".350.gee-cm"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables
@@ -37,7 +37,7 @@ echo
 
 echo -e "${green}"
 echo "------------------------"
-echo "Show: AK geeb Settings"
+echo "Show: AK gee Settings"
 echo "------------------------"
 echo -e "${restore}"
 
@@ -64,11 +64,11 @@ echo "ANYKERNEL_DIR="$ANYKERNEL_DIR
 
 echo -e "${green}"
 echo "-------------------------"
-echo "Making: AK geeb Defconfig"
+echo "Making: AK gee Defconfig"
 echo "-------------------------"
 echo -e "${restore}"
 
-make "geeb_defconfig"
+make "gee_defconfig"
 make -j9
 
 echo -e "${green}"

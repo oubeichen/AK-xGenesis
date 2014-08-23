@@ -284,6 +284,7 @@ static int input_get_disposition(struct input_dev *dev,
 	case EV_KEY:
 		if (is_event_supported(code, dev->keybit, KEY_MAX) &&
 		    !!test_bit(code, dev->key) != value) {
+
 #ifdef CONFIG_TOUCH_WAKE
 			if (code == KEY_POWER && touchwake_is_enabled() &&
 						!device_is_suspended()) {
@@ -293,6 +294,7 @@ static int input_get_disposition(struct input_dev *dev,
 					powerkey_released();
 			}
 #endif
+
 			if (value != 2) {
 				__change_bit(code, dev->key);
 				if (value)

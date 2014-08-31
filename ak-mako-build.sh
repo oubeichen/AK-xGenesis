@@ -10,7 +10,7 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".350.MAKO"
+VER=".355.MAKO"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables
@@ -19,7 +19,7 @@ export CROSS_COMPILE=${HOME}/android/AK-linaro/4.9.2-2014.08.20140831.CR83/bin/a
 export ARCH=arm
 export SUBARCH=arm
 export KBUILD_BUILD_USER=CallMeAldy
-export KBUILD_BUILD_HOST="BuildBox"
+export KBUILD_BUILD_HOST="Phoenix"
 
 DATE_START=$(date +"%s")
 

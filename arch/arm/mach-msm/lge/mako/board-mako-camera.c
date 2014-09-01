@@ -1,4 +1,4 @@
-/* Copyright (c) 2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012, Code Aurora Forum. All rights reserved.
  * Copyright (c) 2012, LGE Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -12,16 +12,13 @@
  *
  */
 
+#include <asm/mach-types.h>
 #include <linux/i2c.h>
 #include <linux/gpio.h>
-#include <linux/platform_data/flash_lm3559.h>
-#include <media/msm_camera.h>
-#include <asm/mach-types.h>
 #include <mach/board.h>
 #include <mach/msm_bus_board.h>
 #include <mach/gpiomux.h>
-#include <mach/board_lge.h>
-
+#include <media/msm_camera.h>
 #include "devices.h"
 #include "board-mako.h"
 
@@ -169,6 +166,9 @@ static struct msm_gpiomux_config apq8064_cam_common_configs[] = {
 };
 
 #if defined(CONFIG_IMX111) || defined(CONFIG_IMX091)
+static struct msm_gpiomux_config apq8064_cam_2d_configs[] = {
+};
+
 static struct msm_bus_vectors cam_init_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_VFE,
@@ -194,7 +194,7 @@ static struct msm_bus_vectors cam_preview_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_VFE,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab  = 27648000,
+		.ab  = 94003200, // org. 27648000 /* LGE_CHANGE, increase preview vector EBI bus band width, 2012.09.26, jungryoul.choi@lge.com */
 		.ib  = 110592000,
 	},
 	{
@@ -215,8 +215,8 @@ static struct msm_bus_vectors cam_video_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_VFE,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab  = 274406400,
-		.ib  = 1812430080,
+		.ab  = 140451840,
+		.ib  = 561807360,
 	},
 	{
 		.src = MSM_BUS_MASTER_VPE,
@@ -236,8 +236,8 @@ static struct msm_bus_vectors cam_snapshot_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_VFE,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab  = 274423680,
-		.ib  = 1097694720,
+		.ab  = 411635520,  // org 274423680  /* LGE_CHANGE, increase VFE-EBI bandwidth for fix UI-freezing, 2012.12.27, seongjo.kim@lge.com */
+		.ib  = 1646542080, // org 1097694720 /* LGE_CHANGE, increase VFE-EBI bandwidth for fix UI-freezing, 2012.12.27, seongjo.kim@lge.com */
 	},
 	{
 		.src = MSM_BUS_MASTER_VPE,
@@ -269,29 +269,8 @@ static struct msm_bus_vectors cam_zsl_vectors[] = {
 	{
 		.src = MSM_BUS_MASTER_JPEG_ENC,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab  = 540000000,
+		.ab  = 810000000, // org 540000000, /* LGE_CHANGE, increase JPEG_ENC ab value for fix TMS Issue, 2013.01.13, seongjo.kim@lge.com */
 		.ib  = 2025000000,
-	},
-};
-
-static struct msm_bus_vectors cam_video_ls_vectors[] = {
-	{
-		.src = MSM_BUS_MASTER_VFE,
-		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab  = 348192000,
-		.ib  = 617103360,
-	},
-	{
-		.src = MSM_BUS_MASTER_VPE,
-		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab  = 206807040,
-		.ib  = 488816640,
-	},
-	{
-		.src = MSM_BUS_MASTER_JPEG_ENC,
-		.dst = MSM_BUS_SLAVE_EBI_CH0,
-		.ab  = 540000000,
-		.ib  = 1350000000,
 	},
 };
 
@@ -315,10 +294,6 @@ static struct msm_bus_paths cam_bus_client_config[] = {
 	{
 		ARRAY_SIZE(cam_zsl_vectors),
 		cam_zsl_vectors,
-	},
-	{
-		ARRAY_SIZE(cam_video_ls_vectors),
-		cam_video_ls_vectors,
 	},
 };
 
@@ -344,9 +319,11 @@ static struct camera_vreg_t apq_8064_back_cam_vreg[] = {
 	{"cam1_vdig", REG_LDO, 1200000, 1200000, 105000},
 	{"cam1_vio", REG_VS, 0, 0, 0},
 	{"cam1_vana", REG_LDO, 2850000, 2850000, 85600},
-#if defined(CONFIG_IMX111)
+// Start LGE_BSP_CAMERA::seongjo.kim@lge.com 2012-06-08 AF board setting for DCM_KDDI
+#if defined(CONFIG_IMX111) || defined(CONFIG_IMX091)
+   // End LGE_BSP_CAMERA::seongjo.kim@lge.com 2012-06-08 AF board setting for DCM_KDDI
 	{"cam1_vaf", REG_LDO, 2800000, 2800000, 300000},
-#else
+#else //yt.jeon 0420 2.8->1.8 revB(SPR), revC(LGU+)
 	{"cam1_vaf", REG_LDO, 1800000, 1800000, 150000},
 #endif
 };
@@ -354,18 +331,18 @@ static struct camera_vreg_t apq_8064_back_cam_vreg[] = {
 
 #ifdef CONFIG_IMX119
 static struct camera_vreg_t apq_8064_front_cam_vreg[] = {
+	{"cam2_vdig", REG_LDO, 1200000, 1200000, 105000}, //rearrange poweron sequence yt.jeon@lge.com 0619
 	{"cam2_vio", REG_VS, 0, 0, 0},
 	{"cam2_vana", REG_LDO, 2800000, 2850000, 85600},
-	{"cam2_vdig", REG_LDO, 1200000, 1200000, 105000},
 };
 #endif
 
+#if defined(CONFIG_IMX111) || defined(CONFIG_IMX091)
 static struct gpio apq8064_common_cam_gpio[] = {
 	{12, GPIOF_DIR_IN, "CAMIF_I2C_DATA"},
 	{13, GPIOF_DIR_IN, "CAMIF_I2C_CLK"},
 };
 
-#if defined(CONFIG_IMX111) || defined(CONFIG_IMX091)
 static struct gpio apq8064_back_cam_gpio[] = {
 	{GPIO_CAM_MCLK0, GPIOF_DIR_IN, "CAMIF_MCLK"},
 	{GPIO_CAM1_RST_N, GPIOF_DIR_OUT, "CAM_RESET"},
@@ -377,7 +354,10 @@ static struct msm_gpio_set_tbl apq8064_back_cam_gpio_set_tbl[] = {
 };
 
 static struct msm_camera_gpio_conf apq8064_back_cam_gpio_conf = {
-	.gpio_no_mux = 1,
+	.cam_gpiomux_conf_tbl = apq8064_cam_2d_configs,
+	.cam_gpiomux_conf_tbl_size = ARRAY_SIZE(apq8064_cam_2d_configs),
+	.cam_gpio_common_tbl = apq8064_common_cam_gpio,
+	.cam_gpio_common_tbl_size = ARRAY_SIZE(apq8064_common_cam_gpio),
 	.cam_gpio_req_tbl = apq8064_back_cam_gpio,
 	.cam_gpio_req_tbl_size = ARRAY_SIZE(apq8064_back_cam_gpio),
 	.cam_gpio_set_tbl = apq8064_back_cam_gpio_set_tbl,
@@ -387,12 +367,13 @@ static struct msm_camera_gpio_conf apq8064_back_cam_gpio_conf = {
 
 #ifdef CONFIG_IMX119
 static struct gpio apq8064_front_cam_gpio[] = {
-/* FIXME: for old HW (LGU Rev.A,B VZW Rev.A,B ATT Rev.A) */
+/* LGE_CHANGE_S, for old HW (LGU Rev.A,B VZW Rev.A,B ATT Rev.A), 2012.04.27, jungryoul.choi@lge.com */
 #if 1
 	{GPIO_CAM_MCLK2, GPIOF_DIR_IN, "CAMIF_MCLK"},
 #else
 	{GPIO_CAM_MCLK1, GPIOF_DIR_IN, "CAMIF_MCLK"},
 #endif
+/* LGE_CHANGE_E, for old HW (LGU Rev.A,B VZW Rev.A,B ATT Rev.A), 2012.04.27, jungryoul.choi@lge.com */
 	{GPIO_CAM2_RST_N, GPIOF_DIR_OUT, "CAM_RESET"},
 };
 
@@ -402,7 +383,10 @@ static struct msm_gpio_set_tbl apq8064_front_cam_gpio_set_tbl[] = {
 };
 
 static struct msm_camera_gpio_conf apq8064_front_cam_gpio_conf = {
-	.gpio_no_mux = 1,
+	.cam_gpiomux_conf_tbl = apq8064_cam_2d_configs,
+	.cam_gpiomux_conf_tbl_size = ARRAY_SIZE(apq8064_cam_2d_configs),
+	.cam_gpio_common_tbl = apq8064_common_cam_gpio,
+	.cam_gpio_common_tbl_size = ARRAY_SIZE(apq8064_common_cam_gpio),
 	.cam_gpio_req_tbl = apq8064_front_cam_gpio,
 	.cam_gpio_req_tbl_size = ARRAY_SIZE(apq8064_front_cam_gpio),
 	.cam_gpio_set_tbl = apq8064_front_cam_gpio_set_tbl,
@@ -417,9 +401,9 @@ static struct msm_camera_i2c_conf apq8064_back_cam_i2c_conf = {
 	.i2c_mux_mode = MODE_L,
 };
 #endif
-#ifdef CONFIG_SEKONIX_LENS_ACT
+#ifdef CONFIG_IMX111_ACT
 static struct i2c_board_info msm_act_main_cam_i2c_info = {
-	I2C_BOARD_INFO("msm_actuator", I2C_SLAVE_ADDR_SEKONIX_LENS_ACT),
+	I2C_BOARD_INFO("msm_actuator", I2C_SLAVE_ADDR_IMX111_ACT),
 };
 
 static struct msm_actuator_info msm_act_main_cam_0_info = {
@@ -458,8 +442,8 @@ static struct msm_camera_sensor_info msm_camera_sensor_imx111_data = {
 	.csi_if	= 1,
 	.camera_type = BACK_CAMERA_2D,
 	.sensor_type = BAYER_SENSOR,
-#ifdef CONFIG_SEKONIX_LENS_ACT
-	.actuator_info = &msm_act_main_cam_0_info,
+#ifdef CONFIG_IMX111_ACT
+		.actuator_info = &msm_act_main_cam_0_info,
 
 #endif
 };
@@ -498,7 +482,7 @@ static struct msm_camera_sensor_platform_info sensor_board_info_imx091 = {
 };
 
 static struct i2c_board_info imx091_eeprom_i2c_info = {
-	I2C_BOARD_INFO("imx091_eeprom", 0x21),
+	I2C_BOARD_INFO("imx091_eeprom", 0x53), //LGE_Update yt.jeon@lge.com eeprom I2C address 0xA6>>1 20120702
 };
 
 static struct msm_eeprom_info imx091_eeprom_info = {
@@ -561,7 +545,13 @@ static struct msm_camera_sensor_info msm_camera_sensor_imx119_data = {
 #endif
 
 /* Enabling flash LED for camera */
-static struct lm3559_flash_platform_data lm3559_flash_pdata[] = {
+struct led_flash_platform_data {
+	unsigned gpio_en;
+	unsigned scl_gpio;
+	unsigned sda_gpio;
+};
+
+static struct led_flash_platform_data lm3559_flash_pdata[] = {
 	{
 		.scl_gpio = GPIO_CAM_FLASH_I2C_SCL,
 		.sda_gpio = GPIO_CAM_FLASH_I2C_SDA,
@@ -574,39 +564,10 @@ static struct platform_device msm_camera_server = {
 	.id = 0,
 };
 
-#define GPIO_CAM_VCM_EN		PM8921_GPIO_PM_TO_SYS(17)
-#define GPIO_CAM_VCM_EN_11	PM8921_GPIO_PM_TO_SYS(20)
-
-static __init void mako_fixup_cam(void)
-{
-	int ret;
-	int gpio_vcm_en;
-
-	if (lge_get_board_revno() > HW_REV_1_0)
-		gpio_vcm_en = GPIO_CAM_VCM_EN_11;
-	else
-		gpio_vcm_en = GPIO_CAM_VCM_EN;
-
-	ret = gpio_request_one(gpio_vcm_en, GPIOF_INIT_HIGH, "vcm_en");
-	if (ret < 0) {
-		pr_err("%s: failed gpio request vcm_en\n", __func__);
-		return;
-	}
-
-	gpio_free(gpio_vcm_en);
-
-	ret = gpio_request_array(apq8064_common_cam_gpio,
-			ARRAY_SIZE(apq8064_common_cam_gpio));
-	if (ret < 0)
-		pr_err("%s: failed gpio request common_cam_gpio\n", __func__);
-}
-
 void __init apq8064_init_cam(void)
 {
 	msm_gpiomux_install(apq8064_cam_common_configs,
 			ARRAY_SIZE(apq8064_cam_common_configs));
-
-	mako_fixup_cam();
 
 	platform_device_register(&msm_camera_server);
 	platform_device_register(&msm8960_device_i2c_mux_gsbi4);

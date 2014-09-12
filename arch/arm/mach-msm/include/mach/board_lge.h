@@ -61,8 +61,6 @@ struct kcal_platform_data {
 	int (*set_values) (int r, int g, int b);
 	int (*get_values) (int *r, int *g, int *b);
 	int (*refresh_display) (void);
-	int (*set_min) (int min);
-	int (*get_min) (int *min);
 };
 #endif
 

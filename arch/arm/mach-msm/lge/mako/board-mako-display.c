@@ -108,17 +108,6 @@ struct kcal_data kcal_value = {
 	.green = 255,
 	.blue  = 255,
 };
-<<<<<<< HEAD
-=======
-
-struct kcal_data kcal_value;
-
-extern int g_kcal_min;
-extern int down_kcal, up_kcal;
-
-extern void sweep2wake_pwrtrigger(void);
-
->>>>>>> refs/remotes/AK-mako/ak-exodus-443
 #endif
 
 #ifdef CONFIG_UPDATE_LCDC_LUT
@@ -311,42 +300,6 @@ static int kcal_refresh_values(void)
 	return update_preset_lcdc_lut();
 }
 
-<<<<<<< HEAD
-=======
-void kcal_send_s2d(int set)
-{
-	int r, g, b;
-
-	r = kcal_value.red;
-	g = kcal_value.green;
-	b = kcal_value.blue;
-
-	if (set == 1) {
-		r = r - down_kcal;
-		g = g - down_kcal;
-		b = b - down_kcal;
-	}
-
-	if (set == 2) {
-		if ((r == 255) && (g == 255) && (b == 255))
-			return;
-
-		r = r + up_kcal;
-		g = g + up_kcal;
-		b = b + up_kcal;
-	}
-
-	if ((r < 1) && (g < 1) && (b < 1))
-		sweep2wake_pwrtrigger();
-		
-
-	kcal_set_values(r, g, b);
-	update_preset_lcdc_lut();
-
-	return;
-}
-
->>>>>>> refs/remotes/AK-mako/ak-exodus-443
 static struct kcal_platform_data kcal_pdata = {
 	.set_values = kcal_set_values,
 	.get_values = kcal_get_values,

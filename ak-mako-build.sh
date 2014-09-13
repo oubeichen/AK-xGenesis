@@ -43,7 +43,7 @@ echo -e "${restore}"
 
 MODULES_DIR=${HOME}/kernel/AK-Mako-AnyKernel/cwm/system/lib/modules
 KERNEL_DIR=`pwd`
-OUTPUT_DIR=${HOME}/kernel/AK-Mako-AnyKernel/zip
+OUTPUT_DIR=${HOME}/kernel/AK-Mako-AnyKernel
 CWM_DIR=${HOME}/kernel/AK-Mako-AnyKernel/cwm
 ZIMAGE_DIR=${HOME}/kernel/AK-Mako/arch/arm/boot
 CWM_MOVE=${HOME}/kernel/AK-releases

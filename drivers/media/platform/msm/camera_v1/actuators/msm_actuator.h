@@ -89,6 +89,7 @@ struct msm_actuator_ctrl_t {
 	uint16_t initial_code;
 	struct msm_camera_i2c_reg_tbl *i2c_reg_tbl;
 	uint16_t i2c_tbl_index;
+        uint32_t curr_hwparams;
 };
 
 #ifdef CONFIG_MSM_ACTUATOR

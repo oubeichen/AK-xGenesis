@@ -29,6 +29,9 @@ extern uint8_t imx111_afcalib_data[4];
 #define ACTUATOR_MIN_MOVE_RANGE              200 // TBD
 #endif
 
+struct region_params_t tmp_region_params[MAX_ACTUATOR_REGION];
+unsigned char frun = 0;
+
 static struct msm_actuator_ctrl_t msm_actuator_t;
 static struct msm_actuator msm_vcm_actuator_table;
 static struct msm_actuator msm_piezo_actuator_table;
@@ -75,6 +78,11 @@ static int32_t msm_actuator_parse_i2c_params(struct msm_actuator_ctrl_t *a_ctrl,
 	int32_t rc = 0;
 	struct msm_camera_i2c_reg_tbl *i2c_tbl = a_ctrl->i2c_reg_tbl;
 	CDBG("%s: IN\n", __func__);
+	
+	uint8_t hw_reg_write = 1;
+        if (a_ctrl->curr_hwparams == hw_params)
+                hw_reg_write = 0;
+	
 	for (i = 0; i < size; i++) {
 		if (write_arr[i].reg_write_type == MSM_ACTUATOR_WRITE_DAC) {
 			value = (next_lens_position <<
@@ -104,19 +112,25 @@ static int32_t msm_actuator_parse_i2c_params(struct msm_actuator_ctrl_t *a_ctrl,
 				i2c_byte1 = (value & 0xFF00) >> 8;
 				i2c_byte2 = value & 0xFF;
 			}
+			i2c_tbl[a_ctrl->i2c_tbl_index].reg_addr = i2c_byte1;
+			i2c_tbl[a_ctrl->i2c_tbl_index].reg_data = i2c_byte2;
+			i2c_tbl[a_ctrl->i2c_tbl_index].delay = delay;
+			a_ctrl->i2c_tbl_index++;
 		} else {
-			i2c_byte1 = write_arr[i].reg_addr;
-			i2c_byte2 = (hw_dword & write_arr[i].hw_mask) >>
-				write_arr[i].hw_shift;
+			if (hw_reg_write) {
+				i2c_byte1 = write_arr[i].reg_addr;
+				i2c_byte2 = (hw_dword & write_arr[i].hw_mask) >>
+					write_arr[i].hw_shift;
+				i2c_tbl[a_ctrl->i2c_tbl_index].reg_addr = i2c_byte1;
+				i2c_tbl[a_ctrl->i2c_tbl_index].reg_data = i2c_byte2;
+				i2c_tbl[a_ctrl->i2c_tbl_index].delay = delay;
+				a_ctrl->i2c_tbl_index++;
+			}
 		}
-		CDBG("%s: i2c_byte1:0x%x, i2c_byte2:0x%x\n", __func__,
-			i2c_byte1, i2c_byte2);
-		i2c_tbl[a_ctrl->i2c_tbl_index].reg_addr = i2c_byte1;
-		i2c_tbl[a_ctrl->i2c_tbl_index].reg_data = i2c_byte2;
-		i2c_tbl[a_ctrl->i2c_tbl_index].delay = delay;
-		a_ctrl->i2c_tbl_index++;
 	}
 		CDBG("%s: OUT\n", __func__);
+	if (rc == 0)
+		a_ctrl->curr_hwparams = hw_params;
 	return rc;
 }
 
@@ -388,6 +402,13 @@ static int32_t msm_actuator_init_default_step_table(struct msm_actuator_ctrl_t *
 	uint16_t data_size = set_info->actuator_params.data_size;
 
 	CDBG("%s called\n", __func__);
+
+	if(!frun){
+	    memcpy(&tmp_region_params,&a_ctrl->region_params,sizeof(tmp_region_params));
+	    frun++;
+	}else{
+	    memcpy(&a_ctrl->region_params,&tmp_region_params,sizeof(tmp_region_params));
+	}
 
 	for (; data_size > 0; data_size--)
 		max_code_size *= 2;
@@ -664,6 +685,7 @@ static int32_t msm_actuator_set_default_focus(
 static int32_t msm_actuator_power_down(struct msm_actuator_ctrl_t *a_ctrl)
 {
 	int32_t rc = 0;
+#ifdef CONFIG_SEKONIX_LENS_ACT
 	int cur_pos = a_ctrl->curr_step_pos;
 	struct msm_actuator_move_params_t move_params;
 
@@ -674,7 +696,7 @@ static int32_t msm_actuator_power_down(struct msm_actuator_ctrl_t *a_ctrl)
 				a_ctrl, &move_params);
 		msleep(300);
 	}
-
+#endif
 	if (a_ctrl->vcm_enable) {
 		rc = gpio_direction_output(a_ctrl->vcm_pwd, 0);
 		if (!rc)

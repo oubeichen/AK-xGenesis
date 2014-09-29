@@ -10,16 +10,16 @@ clear
 
 # AK Kernel Version
 BASE_AK_VER="AK"
-VER=".345.MAKO.CM"
+VER=".355.geeb-aosp"
 AK_VER=$BASE_AK_VER$VER
 
 # AK Variables
 export LOCALVERSION="~"`echo $AK_VER`
-export CROSS_COMPILE=${HOME}/android/AK-linaro/4.9.1-2014.07.20140718.CR83/bin/arm-cortex_a15-linux-gnueabihf-
+export CROSS_COMPILE=${HOME}/kernel/AK-linaro/4.9.2-2014.08.20140831.CR83/bin/arm-cortex_a15-linux-gnueabihf-
 export ARCH=arm
 export SUBARCH=arm
-export KBUILD_BUILD_USER=CallMeAldy
-export KBUILD_BUILD_HOST="BuildBox"
+export KBUILD_BUILD_USER=Edgar
+export KBUILD_BUILD_HOST="Buildbox"
 
 DATE_START=$(date +"%s")
 
@@ -41,14 +41,14 @@ echo "Show: AK geeb Settings"
 echo "------------------------"
 echo -e "${restore}"
 
-MODULES_DIR=${HOME}/kernel/AK-anykernel/cwm/system/lib/modules
+MODULES_DIR=${HOME}/kernel/AK-Mako-AnyKernel/cwm/system/lib/modules
 KERNEL_DIR=`pwd`
-OUTPUT_DIR=${HOME}/kernel/AK-anykernel/zip
-CWM_DIR=${HOME}/kernel/AK-anykernel/cwm
-ZIMAGE_DIR=${HOME}/kernel/AK-xGenesis/arch/arm/boot
+OUTPUT_DIR=${HOME}/kernel/AK-Mako-AnyKernel
+CWM_DIR=${HOME}/kernel/AK-Mako-AnyKernel/cwm
+ZIMAGE_DIR=${HOME}/kernel/AK-Mako/arch/arm/boot
 CWM_MOVE=${HOME}/kernel/AK-releases
-ZIMAGE_ANYKERNEL=${HOME}/kernel/AK-anykernel/cwm/kernel
-ANYKERNEL_DIR=${HOME}/kernel/AK-anykernel
+ZIMAGE_ANYKERNEL=${HOME}/kernel/AK-Mako-AnyKernel/cwm/kernel
+ANYKERNEL_DIR=${HOME}/kernel/AK-Mako-AnyKernel
 
 echo -e "${red}"; echo "COMPILING VERSION:"; echo -e "${blink_red}"; echo "$LOCALVERSION"; echo -e "${restore}"
 echo "CROSS_COMPILE="$CROSS_COMPILE
@@ -73,7 +73,7 @@ make -j9
 
 echo -e "${green}"
 echo "--------------------------"
-echo "Copy: Modules to direcroty"
+echo "Copy: Modules to directory"
 echo "--------------------------"
 echo -e "${restore}"
 
